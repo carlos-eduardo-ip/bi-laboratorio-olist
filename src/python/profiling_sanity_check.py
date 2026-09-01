@@ -56,10 +56,29 @@ df_payments_grouped = df_payments.groupby('order_id').agg({'payment_value': 'sum
 
 divergences = pd.merge(df_order_items_grouped, df_payments_grouped, on='order_id', how='inner')
 divergences['difference'] = divergences['price'] + divergences['freight_value'] - divergences['payment_value']
-count_divergences = divergences[divergences['difference'] != 0].shape[0]
+# Quantidade de divergências (diferença diferente de 0) sem round. Utilizado para verificar se existem divergências significativas, considerando que pequenas diferenças podem ocorrer devido a arredondamentos ou taxas adicionais. Gerando números muito pequenos, como 1e-15, que não são relevantes para a análise. Por isso, é mais apropriado considerar apenas divergências significativas, arredondando a diferença para 2 casas decimais e filtrando aquelas com valor absoluto maior que 0.05.
+# count_divergences = divergences[divergences['difference'] != 0].shape[0]
 
-print(f"  Quantidade de divergências: {count_divergences}. Representa {count_divergences / total_records * 100:.2f} % do total de registros.")
+# print(f"  Quantidade de divergências: {count_divergences}. Representa {count_divergences / total_records * 100:.2f} % do total de registros.")
 
 divergences['diff_rounded'] = divergences['difference'].round(2)
 divergences_reais = divergences[divergences['diff_rounded'].abs() > 0.05]
 print(f"  Quantidade de divergências: {divergences_reais.shape[0]}. Representa {divergences_reais.shape[0] / total_records * 100:.2f} % do total de registros.")
+
+df_reviews = pd.read_csv(dir_dataset / "olist_order_reviews_dataset.csv")
+print("\nQual a distribuição das notas (review_score de 1 a 5)?")
+review_score_distribution = df_reviews['review_score'].value_counts().sort_index()
+for score, count in review_score_distribution.items():
+    print(f"  Nota {score}: {count}")
+
+print("\nO review_id é 100% único ou existem duplicidades?")
+review_id_unique = df_reviews['review_id'].is_unique
+review_id_duplicates = df_reviews['review_id'].duplicated().sum()
+print(f"  O review_id é único: {review_id_unique}. Quantidade de duplicidades: {review_id_duplicates}")
+
+df_geolocation = pd.read_csv(dir_dataset / "olist_geolocation_dataset.csv")
+print("\nO geolocation_zip_code_prefix é único? (Se tiver duplicidades de coordenadas para o mesmo CEP, como você planeja desduplicar isso no futuro para não explodir o modelo com cardinalidade muitos-para-muitos?).")
+
+geolocation_zip_code_prefix_unique = df_geolocation['geolocation_zip_code_prefix'].is_unique
+geolocation_zip_code_prefix_duplicates = df_geolocation['geolocation_zip_code_prefix'].duplicated().sum()
+print(f"  O geolocation_zip_code_prefix é único: {geolocation_zip_code_prefix_unique}. Quantidade de duplicidades: {geolocation_zip_code_prefix_duplicates}")
