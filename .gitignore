@@ -1,0 +1,32 @@
+# Dados locais / arquivos pesados
+/dataset
+/data/
+*.csv
+*.xlsx
+*.xls
+*.parquet
+*.db
+*.sqlite3
+*.bak
+
+# Ambientes virtuais Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# IDE e editor
+.vscode/
+.idea/
+
+# Power BI / arquivos locais de projeto
+*.pbix
+*.pbit
+*.tmp
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
